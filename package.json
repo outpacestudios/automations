@@ -1,0 +1,37 @@
+{
+  "name": "automations",
+  "version": "1.0.0",
+  "description": "Outpace Studios automation workflows",
+  "main": "index.js",
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy -y",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/outpacestudios/automations.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/outpacestudios/automations/issues"
+  },
+  "homepage": "https://github.com/outpacestudios/automations#readme",
+  "dependencies": {
+    "@slack/bolt": "^4.6.0",
+    "@slack/web-api": "^7.13.0",
+    "convex": "^1.31.3",
+    "googleapis": "^170.0.0",
+    "pdfkit": "^0.17.2"
+  },
+  "devDependencies": {
+    "@slack/types": "^2.19.0",
+    "@types/node": "^25.0.6",
+    "@types/pdfkit": "^0.17.4",
+    "typescript": "^5.9.3"
+  }
+}
