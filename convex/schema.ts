@@ -46,6 +46,7 @@ export default defineSchema({
 		),
 		customOptions: v.optional(v.any()),
 		pdfUrl: v.optional(v.string()),
+		pdfStorageId: v.optional(v.id("_storage")),
 		createdAt: v.number(),
 		sentAt: v.optional(v.number()),
 		paidAt: v.optional(v.number()),
@@ -58,4 +59,15 @@ export default defineSchema({
 		key: v.string(),
 		value: v.any(),
 	}).index("by_key", ["key"]),
+
+	invoiceTokens: defineTable({
+		token: v.string(), // 32-char random alphanumeric
+		invoiceId: v.id("invoices"),
+		expiresAt: v.number(), // Timestamp (24 hours from creation)
+		createdAt: v.number(),
+		usedAt: v.optional(v.number()), // Track first access
+	})
+		.index("by_token", ["token"])
+		.index("by_invoice", ["invoiceId"])
+		.index("by_expires", ["expiresAt"]),
 });
