@@ -15,15 +15,19 @@ export const list = query({
 		clientId: v.optional(v.id("clients")),
 	},
 	handler: async (ctx, args) => {
-		let q = ctx.db.query("invoices");
-
 		if (args.status) {
-			q = q.withIndex("by_status", (q) => q.eq("status", args.status!));
-		} else if (args.clientId) {
-			q = q.withIndex("by_client", (q) => q.eq("clientId", args.clientId!));
+			return await ctx.db
+				.query("invoices")
+				.withIndex("by_status", (q) => q.eq("status", args.status!))
+				.collect();
 		}
-
-		return await q.collect();
+		if (args.clientId) {
+			return await ctx.db
+				.query("invoices")
+				.withIndex("by_client", (q) => q.eq("clientId", args.clientId!))
+				.collect();
+		}
+		return await ctx.db.query("invoices").collect();
 	},
 });
 

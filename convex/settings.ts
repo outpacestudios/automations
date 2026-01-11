@@ -1,5 +1,23 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type MutationCtx } from "./_generated/server";
+
+// Helper function for setting a value (used by convenience mutations)
+async function setSetting(
+	ctx: MutationCtx,
+	key: string,
+	value: unknown
+): Promise<void> {
+	const existing = await ctx.db
+		.query("settings")
+		.withIndex("by_key", (q) => q.eq("key", key))
+		.first();
+
+	if (existing) {
+		await ctx.db.patch(existing._id, { value });
+	} else {
+		await ctx.db.insert("settings", { key, value });
+	}
+}
 
 export const get = query({
 	args: { key: v.string() },
@@ -26,19 +44,7 @@ export const set = mutation({
 		value: v.any(),
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("settings")
-			.withIndex("by_key", (q) => q.eq("key", args.key))
-			.first();
-
-		if (existing) {
-			return await ctx.db.patch(existing._id, { value: args.value });
-		} else {
-			return await ctx.db.insert("settings", {
-				key: args.key,
-				value: args.value,
-			});
-		}
+		await setSetting(ctx, args.key, args.value);
 	},
 });
 
@@ -69,9 +75,9 @@ export const setCompanyInfo = mutation({
 		}),
 	},
 	handler: async (ctx, args) => {
-		await ctx.runMutation(set, { key: "companyName", value: args.companyName });
-		await ctx.runMutation(set, { key: "companyAddress", value: args.companyAddress });
-		await ctx.runMutation(set, { key: "bankDetails", value: args.bankDetails });
+		await setSetting(ctx, "companyName", args.companyName);
+		await setSetting(ctx, "companyAddress", args.companyAddress);
+		await setSetting(ctx, "bankDetails", args.bankDetails);
 	},
 });
 
@@ -81,9 +87,9 @@ export const setSlackConfig = mutation({
 		defaultChannelId: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		await ctx.runMutation(set, { key: "slackWebhookUrl", value: args.webhookUrl });
+		await setSetting(ctx, "slackWebhookUrl", args.webhookUrl);
 		if (args.defaultChannelId) {
-			await ctx.runMutation(set, { key: "slackDefaultChannelId", value: args.defaultChannelId });
+			await setSetting(ctx, "slackDefaultChannelId", args.defaultChannelId);
 		}
 	},
 });
@@ -94,9 +100,9 @@ export const setGoogleDriveConfig = mutation({
 		serviceAccountEmail: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		await ctx.runMutation(set, { key: "googleDriveFolderId", value: args.folderId });
+		await setSetting(ctx, "googleDriveFolderId", args.folderId);
 		if (args.serviceAccountEmail) {
-			await ctx.runMutation(set, { key: "googleServiceAccountEmail", value: args.serviceAccountEmail });
+			await setSetting(ctx, "googleServiceAccountEmail", args.serviceAccountEmail);
 		}
 	},
 });
